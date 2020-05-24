@@ -1,5 +1,5 @@
 const express = require('express')
-const mongo = require('mongodb').MongoClient({useUnifiedTopology: true})
+const mongo = require('mongodb')
 const crypto = require('crypto')
 const cors = require('cors')
 const app = express()
@@ -8,7 +8,7 @@ const port = 3500
 
 var main = null
 
-mongo.connect('mongodb://127.0.0.1:4000', (err, result) => { // Load database to main
+mongo.connect('mongodb://127.0.0.1:4000', {useUnifiedTopology: true}, (err, result) => { // Load database to main
   if (err) {
     console.log(`Mongo could not connect: ${err}`)
     return
@@ -31,3 +31,6 @@ mongo.connect('mongodb://127.0.0.1:4000', (err, result) => { // Load database to
   app.listen(port, () => console.log('Started server...'))
 })
 
+app.get('/', (req, res) => {
+  res.send('Response')
+})
