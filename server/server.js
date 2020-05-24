@@ -2,9 +2,21 @@ const express = require('express')
 const mongo = require('mongodb')
 const crypto = require('crypto')
 const cors = require('cors')
+const https = require('https')
+const fs = require('fs')
 const app = express()
 app.use(cors())
 const port = 3500
+
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/privkey.pem', 'utf8')
+const certificate = fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/cert.pem', 'utf8')
+const ca = fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/chain.pem', 'utf8')
+
+const credentials = {
+  key: privateKey,
+  cert: certificate,
+  ca: ca
+}
 
 var main = null
 
@@ -34,3 +46,5 @@ mongo.connect('mongodb://127.0.0.1:4000', {useUnifiedTopology: true}, (err, resu
 app.get('/', (req, res) => {
   res.send('Response')
 })
+
+https.createServer(credentials, app).listen(port, () => console.log('Server listening'))
