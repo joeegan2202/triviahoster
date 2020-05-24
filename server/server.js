@@ -40,11 +40,10 @@ mongo.connect('mongodb://127.0.0.1:4000', {useUnifiedTopology: true}, (err, resu
     })
   }, 1000)
 
-  app.listen(port, () => console.log('Started server...'))
+  https.createServer(credentials, app).listen(port, () => console.log('Server listening'))
 })
 
 app.get('/', (req, res) => {
   res.send('Response')
 })
 
-https.createServer(credentials, app).listen(port, () => console.log('Server listening'))
