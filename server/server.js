@@ -43,22 +43,14 @@ mongo.connect('mongodb://127.0.0.1:4000', { useUnifiedTopology: true }, (err, re
   https.createServer(credentials, app).listen(port, () => console.log('Server listening'))
 })
 
-app.get('/admin', (req, res) => { // All server requests not authenticating
-
-  //
-  // Verify session id
-  //
+function verifySessionId(req, res, callback) {
   main.collection('sessions').findOne({ session: req.query.session }, (err, find) => {
     if (find) {
       if (Date.now() - find.time < 30 * 60 * 1000) {
         let result = { session: find.session }
         console.log(`Session authenticated: ${find.session}`)
-        //
-        // Execute primary request
-        //
-        if (req.query.test) {
-          result.requestedData = `query received from client: ${req.query.test}`
-        }
+
+        callback(result)
 
         // End response
         res.send(result)
@@ -70,6 +62,22 @@ app.get('/admin', (req, res) => { // All server requests not authenticating
       res.send(false)
     }
   })
+}
+
+app.get('/admin', (req, res) => { // All server requests not authenticating
+
+  //
+  // Verify session id
+  //
+  verifySessionId(req, res, (result) => {
+    //
+    // Execute primary request
+    //
+    if (req.query.test) {
+      result.requestedData = `query received from client: ${req.query.test}`
+    }
+
+  })
 })
 
 app.get('/admin/auth', (req, res) => { // For just authenticating
@@ -78,6 +86,7 @@ app.get('/admin/auth', (req, res) => { // For just authenticating
     uname = '' + req.query.uname
   } catch (e) {
     console.log('User tried to log in with invalid username')
+    res.send(false)
     return
   }
   let pword
@@ -85,6 +94,7 @@ app.get('/admin/auth', (req, res) => { // For just authenticating
     pword = crypto.createHash('sha256').update(req.query.pword).digest('hex')
   } catch (e) {
     console.log('User tried to log in with invalid password')
+    res.send(false)
     return
   }
 
@@ -107,6 +117,7 @@ app.get('/admin/auth/update', (req, res) => {
     uname = '' + req.query.uname
   } catch (e) {
     console.log('User tried to update with invalid username')
+    res.send(false)
     return
   }
   let pword
@@ -114,6 +125,7 @@ app.get('/admin/auth/update', (req, res) => {
     pword = crypto.createHash('sha256').update(req.query.pword).digest('hex')
   } catch (e) {
     console.log('User tried to update with invalid password')
+    res.send(false)
     return
   }
   let token
@@ -121,6 +133,14 @@ app.get('/admin/auth/update', (req, res) => {
     token = '' + req.query.token
   } catch (e) {
     console.log('User tried to update with invalid token')
+    res.send(false)
+    return
+  }
+
+  if (token === 'new') {
+    main.collection('admin-auth').insertOne({ uname, pword })
+  } else {
+    main.collection('admin-auth').findOneAndUpdate({ uname }, { pword }, { returnNewDocument: true })
   }
 })
 
