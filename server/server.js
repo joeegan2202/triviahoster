@@ -228,7 +228,7 @@ app.get('/admin/auth/update', (req, res) => {
       if (result) {
         main.collection('admin-auth').findOne({ uname, pword: oldPword }, (err, find) => { // Attempt to find auth entry with username and password
           if (find) {
-            main.collection('admin-auth').findOneAndReplace({ uname }, { uname, newPword })
+            main.collection('admin-auth').findOneAndReplace({ uname }, { uname, pword: newPword })
             res.send(true)
           } else {
             console.log('User trying to update did not authenticate')
