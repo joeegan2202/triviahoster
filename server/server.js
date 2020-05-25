@@ -6,6 +6,7 @@ const fs = require('fs')
 
 const admin = require('./admin')
 const games = require('./games')
+const utils = require('./utils')
 
 const app = express()
 app.use(cors())
