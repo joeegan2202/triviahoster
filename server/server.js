@@ -43,23 +43,20 @@ mongo.connect('mongodb://127.0.0.1:4000', { useUnifiedTopology: true }, (err, re
   https.createServer(credentials, app).listen(port, () => console.log('Server listening'))
 })
 
-function verifySessionId(req, res, callback) {
-  main.collection('sessions').findOne({ session: req.query.session }, (err, find) => {
+function verifySessionId(session, callback) {
+  main.collection('sessions').findOne({ session }, (err, find) => {
     if (find) {
       if (Date.now() - find.time < 30 * 60 * 1000) {
         let result = { session: find.session }
         console.log(`Session authenticated: ${find.session}`)
 
         callback(result)
-
-        // End response
-        res.send(result)
       } else {
-        main.collection('sessions').deleteOne({ session: req.query.session })
-        res.send(false)
+        main.collection('sessions').deleteOne({ session })
+        callback(false)
       }
     } else {
-      res.send(false)
+      callback(false)
     }
   })
 }
@@ -69,7 +66,7 @@ app.get('/admin', (req, res) => { // All server requests not authenticating
   //
   // Verify session id
   //
-  verifySessionId(req, res, (result) => {
+  verifySessionId(req.query.session, (result) => {
     //
     // Execute primary request
     //
@@ -77,6 +74,7 @@ app.get('/admin', (req, res) => { // All server requests not authenticating
       result.requestedData = `query received from client: ${req.query.test}`
     }
 
+    res.send(result)
   })
 })
 
@@ -137,12 +135,20 @@ app.get('/admin/auth/update', (req, res) => {
     return
   }
 
-  console.log(`Username: ${uname}, Password: ${pword}, Token: ${token}`)
+  console.log(`User updating... Username: ${uname}, Password: ${pword}, Token: ${token}`)
 
   if (token === 'new') {
     main.collection('admin-auth').insertOne({ uname, pword })
+    res.send(true)
   } else {
-    main.collection('admin-auth').findOneAndUpdate({ uname }, { pword }, { returnNewDocument: true })
+    verifySessionId(token, (result) => {
+      if (result) {
+        main.collection('admin-auth').findOneAndUpdate({ uname }, { pword }, { returnNewDocument: true })
+        res.send(true)
+      } else {
+        res.send(false)
+      }
+    })
   }
 })
 
