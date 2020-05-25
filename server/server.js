@@ -155,7 +155,7 @@ app.get('/admin/auth/update', (req, res) => {
         console.log('got a result')
         if (result.uname === uname) {
           console.log('result uname matches my uname')
-          main.collection('admin-auth').findOne({ uname, oldPword }, (err, find) => { // Attempt to find auth entry with username and password
+          main.collection('admin-auth').findOne({ uname, pword: oldPword }, (err, find) => { // Attempt to find auth entry with username and password
             if (find) {
               console.log('the authentication check has worked and we are going to update')
               main.collection('admin-auth').findOneAndReplace({ uname }, { uname, newPword })
