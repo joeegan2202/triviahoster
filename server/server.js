@@ -43,8 +43,8 @@ mongo.connect('mongodb://127.0.0.1:4000', { useUnifiedTopology: true }, (err, re
   https.createServer(credentials, app).listen(port, () => console.log('Server listening'))
 })
 
-function verifySessionId(session, callback) {
-  main.collection('sessions').findOne({ session }, (err, find) => {
+function verifySessionId(session, uname, callback) {
+  main.collection('sessions').findOne({ session, uname }, (err, find) => {
     if (find) {
       if (Date.now() - find.time < 30 * 60 * 1000) {
         let result = { session: find.session, uname: find.uname }
@@ -66,15 +66,88 @@ app.get('/admin', (req, res) => { // All server requests not authenticating
   //
   // Verify session id
   //
-  verifySessionId(req.query.session, (result) => {
-    //
-    // Execute primary request
-    //
-    if (req.query.test) {
-      result.requestedData = `query received from client: ${req.query.test}`
-    }
+  verifySessionId(req.query.session, req.query.uname, (result) => {
+    if (result) {
+      //
+      // Execute primary request
+      //
+      if (req.query.test) {
+        result.requestedData = `query received from client: ${req.query.test}`
+      }
 
-    res.send(result)
+      res.send(result)
+    } else {
+      res.send(false)
+    }
+  })
+})
+
+app.post('/admin/games/create', (req, res) => {
+  let uname
+  try {
+    uname = '' + req.query.uname
+  } catch (e) {
+    console.log('User tried to get games with invalid username')
+    res.send(false)
+    return
+  }
+  let session
+  try {
+    session = '' + req.query.session
+  } catch (e) {
+    console.log('User tried to get games with invalid session')
+    res.send(false)
+    return
+  }
+
+  verifySessionId(session, uname, (result) => {
+    if (result) {
+      main.collection('admin-games').insertOne({ uname, created: time.now(), body: req.body }, (err, result) => {
+        if (err) {
+          console.log('could not insert new game')
+          res.send(false)
+        } else {
+          res.send(true)
+        }
+      })
+    } else {
+      res.send(false)
+    }
+  })
+})
+
+app.get('/admin/games/get', (req, res) => {
+  let uname
+  try {
+    uname = '' + req.query.uname
+  } catch (e) {
+    console.log('User tried to get games with invalid username')
+    res.send(false)
+    return
+  }
+  let session
+  try {
+    session = '' + req.query.session
+  } catch (e) {
+    console.log('User tried to get games with invalid session')
+    res.send(false)
+    return
+  }
+
+  verifySessionId(session, uname, (result) => {
+    if (result) {
+      main.collection('admin-games').find({ uname }, { uname: false }).toArray((err, result) => {
+        if (err) {
+          console.log('There was an error getting games: ${err}')
+          res.send(false)
+        } else {
+          console.log(result)
+          res.send(result)
+        }
+      })
+    } else {
+      res.send(false)
+    }
   })
 })
 
@@ -134,39 +207,31 @@ app.get('/admin/auth/update', (req, res) => {
     res.send(false)
     return
   }
-  let token
+  let session
   try {
-    token = '' + req.query.token
+    session = '' + req.query.session
   } catch (e) {
-    console.log('User tried to update with invalid token')
+    console.log('User tried to update with invalid session')
     res.send(false)
     return
   }
 
-  console.log(`User updating... Username: ${uname}, Old Password: ${oldPword}, New Password: ${newPword}, Token: ${token}`)
+  console.log(`User updating... Username: ${uname}, Old Password: ${oldPword}, New Password: ${newPword}, Token: ${session}`)
 
-  if (token === 'new') {
+  if (session === 'new') {
     main.collection('admin-auth').insertOne({ uname, newPword })
     res.send(true)
   } else {
-    console.log('attempting to verify session id')
-    verifySessionId(token, (result) => {
+    verifySessionId(session, uname, (result) => {
       if (result) {
-        console.log('got a result')
-        if (result.uname === uname) {
-          console.log('result uname matches my uname')
-          main.collection('admin-auth').findOne({ uname, pword: oldPword }, (err, find) => { // Attempt to find auth entry with username and password
-            if (find) {
-              console.log('the authentication check has worked and we are going to update')
-              main.collection('admin-auth').findOneAndReplace({ uname }, { uname, newPword })
-              res.send(true)
-            } else {
-              res.send(false)
-            }
-          })
-        } else {
-          res.send(false)
-        }
+        main.collection('admin-auth').findOne({ uname, pword: oldPword }, (err, find) => { // Attempt to find auth entry with username and password
+          if (find) {
+            main.collection('admin-auth').findOneAndReplace({ uname }, { uname, newPword })
+            res.send(true)
+          } else {
+            res.send(false)
+          }
+        })
       } else {
         res.send(false)
       }
