@@ -137,6 +137,8 @@ app.get('/admin/auth/update', (req, res) => {
     return
   }
 
+  console.log(`Username: ${uname}, Password: ${pword}, Token: ${token}`)
+
   if (token === 'new') {
     main.collection('admin-auth').insertOne({ uname, pword })
   } else {
