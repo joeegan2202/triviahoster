@@ -118,9 +118,17 @@ app.get('/admin/auth/update', (req, res) => {
     res.send(false)
     return
   }
-  let pword
+  let oldPword
   try {
-    pword = crypto.createHash('sha256').update(req.query.pword).digest('hex')
+    oldPword = crypto.createHash('sha256').update(req.query.oldPword).digest('hex')
+  } catch (e) {
+    console.log('User tried to update with invalid password')
+    res.send(false)
+    return
+  }
+  let newPword
+  try {
+    newPword = crypto.createHash('sha256').update(req.query.newPword).digest('hex')
   } catch (e) {
     console.log('User tried to update with invalid password')
     res.send(false)
@@ -135,16 +143,22 @@ app.get('/admin/auth/update', (req, res) => {
     return
   }
 
-  console.log(`User updating... Username: ${uname}, Password: ${pword}, Token: ${token}`)
+  console.log(`User updating... Username: ${uname}, Old Password: ${oldPword}, New Password: ${newPword}, Token: ${token}`)
 
   if (token === 'new') {
-    main.collection('admin-auth').insertOne({ uname, pword })
+    main.collection('admin-auth').insertOne({ uname, newPword })
     res.send(true)
   } else {
     verifySessionId(token, (result) => {
       if (result) {
-        main.collection('admin-auth').findOneAndReplace({ uname }, { uname, pword })
-        res.send(true)
+        main.collection('admin-auth').findOne({ uname, oldPword }, (err, find) => { // Attempt to find auth entry with username and password
+          if (find) {
+            main.collection('admin-auth').findOneAndReplace({ uname }, { uname, newPword })
+            res.send(true)
+          } else {
+            res.send(false)
+          }
+        })
       } else {
         res.send(false)
       }
