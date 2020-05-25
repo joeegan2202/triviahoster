@@ -47,7 +47,7 @@ function verifySessionId(session, callback) {
   main.collection('sessions').findOne({ session }, (err, find) => {
     if (find) {
       if (Date.now() - find.time < 30 * 60 * 1000) {
-        let result = { session: find.session }
+        let result = { session: find.session, uname: find.uname }
         console.log(`Session authenticated: ${find.session}`)
 
         callback(result)
@@ -101,7 +101,7 @@ app.get('/admin/auth', (req, res) => { // For just authenticating
       console.log(find._id.toString()) // If found, debug testing
       const now = Date.now()
       const session = crypto.createHash('sha256').update(find._id.toString() + now).digest('hex') // Create session id based off of mongo _id and current time
-      main.collection('sessions').insertOne({ time: now, session })
+      main.collection('sessions').insertOne({ time: now, session, uname })
       res.send({ session }) // Insert to database sessions and return to client
     } else {
       res.send(false) // Otherwise, return false
@@ -149,16 +149,24 @@ app.get('/admin/auth/update', (req, res) => {
     main.collection('admin-auth').insertOne({ uname, newPword })
     res.send(true)
   } else {
+    console.log('attempting to verify session id')
     verifySessionId(token, (result) => {
       if (result) {
-        main.collection('admin-auth').findOne({ uname, oldPword }, (err, find) => { // Attempt to find auth entry with username and password
-          if (find) {
-            main.collection('admin-auth').findOneAndReplace({ uname }, { uname, newPword })
-            res.send(true)
-          } else {
-            res.send(false)
-          }
-        })
+        console.log('got a result')
+        if (result.uname === uname) {
+          console.log('result uname matches my uname')
+          main.collection('admin-auth').findOne({ uname, oldPword }, (err, find) => { // Attempt to find auth entry with username and password
+            if (find) {
+              console.log('the authentication check has worked and we are going to update')
+              main.collection('admin-auth').findOneAndReplace({ uname }, { uname, newPword })
+              res.send(true)
+            } else {
+              res.send(false)
+            }
+          })
+        } else {
+          res.send(false)
+        }
       } else {
         res.send(false)
       }
