@@ -6,7 +6,7 @@ const fs = require('fs')
 
 const admin = require('./admin')
 const games = require('./games')
-const utils = require('./utils')
+const global = require('./global')
 
 const app = express()
 app.use(cors())
@@ -29,15 +29,15 @@ mongo.connect('mongodb://127.0.0.1:4000', { useUnifiedTopology: true }, (err, re
     return
   }
 
-  utils.main = result.db('main')
-  utils.main.collection('sessions').deleteMany({}) // Automatically delete all sessions if server restarts
+  global.main = result.db('main')
+  global.main.collection('sessions').deleteMany({}) // Automatically delete all sessions if server restarts
   setInterval(() => {
-    utils.main.collection('sessions').find({}).toArray((err, find) => {
+    global.main.collection('sessions').find({}).toArray((err, find) => {
       if (err) return
 
       for (let session of find) {
         if (Date.now() - session.time > 30 * 60 * 1000) {
-          utils.main.collection('sessions').deleteOne(session)
+          global.main.collection('sessions').deleteOne(session)
         }
       }
     })

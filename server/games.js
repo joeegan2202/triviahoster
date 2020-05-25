@@ -1,5 +1,6 @@
 // For admin game management
 const utils = require('./utils')
+const global = require('./global')
 
 module.exports = {
   create,
@@ -29,7 +30,7 @@ function create(req, res) {
 
   utils.verifySessionId(session, uname, (result) => {
     if (result) {
-      utils.main.collection('admin-games').insertOne({ uname, created: Date.now(), body: req.body }, (err, result) => {
+      global.main.collection('admin-games').insertOne({ uname, created: Date.now(), body: req.body }, (err, result) => {
         if (err) {
           console.log('could not insert new game')
           res.send(false)
@@ -71,7 +72,7 @@ function deleteGame(req, res) {
 
   utils.verifySessionId(session, uname, (result) => {
     if (result) {
-      utils.main.collection('admin-games').deleteOne({ _id: gameId, uname }, (err, result) => {
+      global.main.collection('admin-games').deleteOne({ _id: gameId, uname }, (err, result) => {
         if (err) {
           console.log('could not delete game')
           res.send(false)
@@ -106,7 +107,7 @@ function get(req, res) {
 
   utils.verifySessionId(session, uname, (result) => {
     if (result) {
-      utils.main.collection('admin-games').find({ uname }, { uname: false }).toArray((err, result) => {
+      global.main.collection('admin-games').find({ uname }, { uname: false }).toArray((err, result) => {
         if (err) {
           console.log('There was an error getting games: ${err}')
           res.send(false)
