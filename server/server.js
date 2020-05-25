@@ -221,7 +221,7 @@ app.get('/admin/auth/update', (req, res) => {
 
   if (session === 'new') {
     console.log('inserting new user')
-    main.collection('admin-auth').insertOne({ uname, newPword })
+    main.collection('admin-auth').insertOne({ uname, pword: newPword })
     res.send(true)
   } else {
     verifySessionId(session, uname, (result) => {
