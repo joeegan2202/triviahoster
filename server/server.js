@@ -170,15 +170,15 @@ app.get('/admin/auth', (req, res) => { // For just authenticating
   }
 
   main.collection('admin-auth').findOne({ uname, pword }, (err, find) => { // Attempt to find auth entry with username and password
-    if (err) {
-      console.log('could not find auth pair in database: ${err}')
-      res.send(false) // Otherwise, return false
-    } else {
+    if (find) {
       console.log(find._id.toString()) // If found, debug testing
       const now = Date.now()
       const session = crypto.createHash('sha256').update(find._id.toString() + now).digest('hex') // Create session id based off of mongo _id and current time
       main.collection('sessions').insertOne({ time: now, session, uname })
       res.send({ session }) // Insert to database sessions and return to client
+    } else {
+      console.log('could not find auth pair in database: ${err}')
+      res.send(false) // Otherwise, return false
     }
   })
 })
