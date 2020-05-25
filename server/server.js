@@ -102,7 +102,7 @@ app.post('/admin/games/create', (req, res) => {
 
   verifySessionId(session, uname, (result) => {
     if (result) {
-      main.collection('admin-games').insertOne({ uname, created: time.now(), body: req.body }, (err, result) => {
+      main.collection('admin-games').insertOne({ uname, created: Date.now(), body: req.body }, (err, result) => {
         if (err) {
           console.log('could not insert new game')
           res.send(false)
