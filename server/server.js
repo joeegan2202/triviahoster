@@ -143,7 +143,7 @@ app.get('/admin/auth/update', (req, res) => {
   } else {
     verifySessionId(token, (result) => {
       if (result) {
-        main.collection('admin-auth').findOneAndUpdate({ uname }, { pword }, { returnNewDocument: true })
+        main.collection('admin-auth').findOneAndReplace({ uname }, { uname, pword })
         res.send(true)
       } else {
         res.send(false)
