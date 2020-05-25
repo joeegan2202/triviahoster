@@ -100,6 +100,8 @@ app.post('/admin/games/create', (req, res) => {
     return
   }
 
+  console.log(req.body)
+
   verifySessionId(session, uname, (result) => {
     if (result) {
       main.collection('admin-games').insertOne({ uname, created: Date.now(), body: req.body }, (err, result) => {
