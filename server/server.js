@@ -4,8 +4,10 @@ const crypto = require('crypto')
 const cors = require('cors')
 const https = require('https')
 const fs = require('fs')
+const bodyparser = require('body-parser')
 const app = express()
 app.use(cors())
+app.use(bodyparser)
 const port = 3500
 
 const privateKey = fs.readFileSync('/etc/letsencrypt/live/trivia.eganshub.net/privkey.pem', 'utf8')
