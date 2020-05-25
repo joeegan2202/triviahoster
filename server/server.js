@@ -88,7 +88,7 @@ app.post('/admin/games/create', (req, res) => {
   try {
     uname = '' + req.query.uname
   } catch (e) {
-    console.log('User tried to get games with invalid username')
+    console.log('User tried to create game with invalid username')
     res.send(false)
     return
   }
@@ -96,7 +96,7 @@ app.post('/admin/games/create', (req, res) => {
   try {
     session = '' + req.query.session
   } catch (e) {
-    console.log('User tried to get games with invalid session')
+    console.log('User tried to create game with invalid session')
     res.send(false)
     return
   }
@@ -114,6 +114,49 @@ app.post('/admin/games/create', (req, res) => {
         }
       })
     } else {
+      res.send(false)
+    }
+  })
+})
+
+app.post('/admin/games/delete', (req, res) => {
+  let uname
+  try {
+    uname = '' + req.query.uname
+  } catch (e) {
+    console.log('User tried to delete game with invalid username')
+    res.send(false)
+    return
+  }
+  let session
+  try {
+    session = '' + req.query.session
+  } catch (e) {
+    console.log('User tried to delete game with invalid session')
+    res.send(false)
+    return
+  }
+  let gameId
+  try {
+    gameId = '' + req.query.gameId
+  } catch (e) {
+    console.log('User tried to delete game with invalid game id')
+    res.send(false)
+    return
+  }
+
+  verifySessionId(session, uname, (result) => {
+    if (result) {
+      main.collection('admin-games').deleteOne({ _id: gameId, uname }, (err, result) => {
+        if (err) {
+          console.log('could not delete game')
+          res.send(false)
+        } else {
+          res.send(true)
+        }
+      })
+    } else {
+      console.log('Session did not verify to delete game')
       res.send(false)
     }
   })
