@@ -1,6 +1,5 @@
 // For admin game management
 const utils = require('./utils')
-const global = require('./global')
 
 module.exports = {
   create,

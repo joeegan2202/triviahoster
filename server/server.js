@@ -6,7 +6,6 @@ const fs = require('fs')
 
 const admin = require('./admin')
 const games = require('./games')
-const global = require('./global')
 
 const app = express()
 app.use(cors())
@@ -22,6 +21,8 @@ const credentials = {
   cert: certificate,
   ca: ca
 }
+
+global.main = {}
 
 mongo.connect('mongodb://127.0.0.1:4000', { useUnifiedTopology: true }, (err, result) => { // Load database to main
   if (err) {

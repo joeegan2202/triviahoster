@@ -1,7 +1,6 @@
 // For admin authentication
 const crypto = require('crypto')
 const utils = require('./utils')
-const global = require('./global')
 
 module.exports = {
   auth,

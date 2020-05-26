@@ -1,6 +1,4 @@
 // Generic utilities
-const utils = require('./utils')
-
 module.exports = {
   verifySessionId,
 }
