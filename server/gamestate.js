@@ -14,7 +14,7 @@ class GameState {
     let number
     do {
       number = Math.floor((Math.random() * 1000000))
-    } while (!this.roomNumbers.includes(number))
+    } while (this.roomNumbers.includes(number))
 
     let answers = []
     game.body.rounds.forEach(() => answers.push({}))
