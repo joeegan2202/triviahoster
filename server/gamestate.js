@@ -1,11 +1,6 @@
 const fs = require('fs')
 const crypto = require('crypto')
 
-module.exports = {
-  GameState,
-  adminAccess
-}
-
 class GameState {
   constructor() {
     this.games = {}
@@ -198,4 +193,9 @@ function adminAccess(req, res) {
       res.send(false)
     }
   })
+}
+
+module.exports = {
+  GameState,
+  adminAccess
 }
