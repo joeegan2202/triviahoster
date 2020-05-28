@@ -17,7 +17,7 @@ class GameState {
     } while (this.roomNumbers.includes(number))
 
     let answers = []
-    game.body.rounds.forEach(() => answers.push({}))
+    game.rounds.forEach(() => answers.push({}))
 
     this.games[game._id] = {
       owner: game.uname,
@@ -168,7 +168,7 @@ function adminAccess(req, res) {
   } catch (e) {}
   let game
   try {
-    game = req.query.game
+    game = req.body
   } catch (e) {}
   let roundStart
   try {
