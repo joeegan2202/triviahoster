@@ -1,5 +1,6 @@
 const fs = require('fs')
 const crypto = require('crypto')
+const utils = require('./utils')
 
 class GameState {
   constructor() {
