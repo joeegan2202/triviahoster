@@ -6,6 +6,9 @@ const fs = require('fs')
 
 const admin = require('./admin')
 const games = require('./games')
+const GameState = require('./gamestate')
+
+let state = new GameState.GameState()
 
 const app = express()
 app.use(cors())
@@ -47,7 +50,9 @@ mongo.connect('mongodb://127.0.0.1:4000', { useUnifiedTopology: true }, (err, re
   https.createServer(credentials, app).listen(port, () => console.log('Server listening'))
 })
 
-app.get('/admin/games/create', games.create)
+app.get('/play/admin/start', GameState.adminAccess.bind({ execute: state.startGame }))
+
+app.post('/admin/games/create', games.create)
 
 app.get('/admin/games/delete', games.deleteGame)
 
