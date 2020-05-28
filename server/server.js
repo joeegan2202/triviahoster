@@ -50,7 +50,7 @@ mongo.connect('mongodb://127.0.0.1:4000', { useUnifiedTopology: true }, (err, re
   https.createServer(credentials, app).listen(port, () => console.log('Server listening'))
 })
 
-app.get('/play/admin/start', GameState.adminAccess.bind({ execute: state.startGame }))
+app.get('/play/admin/start', GameState.adminAccess.bind({ execute: state.startGame.bind(state) }))
 
 app.post('/admin/games/create', games.create)
 
