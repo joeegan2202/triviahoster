@@ -32,7 +32,7 @@ const Join = () => {
   return (
     <div id="join">
       <h1>Please Join on this page!!!</h1>
-      <a href="/">Click here to go home</a>
+      <Link to="/">Click here to go home</Link>
     </div>
   )
 }
@@ -41,7 +41,7 @@ const Home = () => {
   return (
     <div id="home">
       <h1>This is the Home Page!!!!</h1>
-      <a href="/join">Click here to go to the join page</a>
+      <Link to="/join">Click here to go to the join page</Link>
     </div>
   )
 }
