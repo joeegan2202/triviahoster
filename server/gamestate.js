@@ -9,15 +9,32 @@ class GameState {
     this.words = JSON.parse(fs.readFileSync('server/words.json', 'utf8').toLowerCase())
   }
 
+  // Start Game method:
+  // args:
+  // game: {
+  // uname: "Joe Smith",
+  // title: "Some Test Trivia Game",
+  // body: { //This is the meat and potatoes of the game object. It contains info about the questions and answers
+  //  rounds: [
+  //    [{text: "Joe Egan is which gender?", img: "<<url-here>>"}, ... ], //Round 1
+  //    [{text: "Joe Egan is which age?", img: "<<url-here>>"}, ... ] //Round 2
+  //  ],
+  //  answerKey: [
+  //    ["Male", ... ], //Round 1
+  //    ["17", ... ] //Round 2
+  //  ]
+  // }
+  // }
   startGame(args) {
     let game = args.game
     let number
     do {
       number = Math.floor((Math.random() * 1000000))
     } while (this.roomNumbers.includes(number))
+    this.roomNumbers.push(number)
 
     let answers = []
-    game.rounds.forEach(() => answers.push({}))
+    game.body.rounds.forEach(() => answers.push({}))
 
     this.games[game._id] = {
       owner: game.uname,
@@ -25,8 +42,8 @@ class GameState {
       title: game.title,
       roomNumber: number,
       password: `${this.words[Math.floor(Math.random() * 1000)]} ${this.words[Math.floor(Math.random() * 1000)]} ${this.words[Math.floor(Math.random() * 1000)]} ${this.words[Math.floor(Math.random() * 1000)]} `,
-      rounds: game.rounds,
-      answerKey: game.answerKey,
+      rounds: game.body.rounds,
+      answerKey: game.body.answerKey,
       currRound: 0,
       currQuestion: 0,
       answers: answers,
@@ -39,21 +56,21 @@ class GameState {
     return this.games[args.gid]
   }
 
-  //TODO: Get gid automatically
-
   getPlayerState(args) {
     let pid = args.pid
-    let game = this.games[gid]
 
-    for (player of game.players) {
-      if (player.id === pid) {
-        if (showScores) {
-          return game.scores
-        } else {
-          return {
-            owner: game.owner,
-            title: game.title,
-            questions: game.rounds[game.currRound].slice(0, game.currQuestion + 1),
+    for (game in this.games) {
+      let game = this.games[gid]
+      for (player of game.players) {
+        if (player.id === pid) {
+          if (showScores) {
+            return game.scores
+          } else {
+            return {
+              owner: game.owner,
+              title: game.title,
+              questions: game.rounds[game.currRound].slice(0, game.currQuestion + 1),
+            }
           }
         }
       }
@@ -62,7 +79,11 @@ class GameState {
     return false
   }
 
-  join(name, roomNumber, password) {
+  join(args) {
+    let name = args.name
+    let roomNumber = args.roomNumber
+    let password = args.password
+
     for (gid in this.games) {
       if (this.games[gid].roomNumber === roomNumber) {
         if (this.games[gid].password === password.toLowerCase()) {
@@ -76,14 +97,18 @@ class GameState {
     return false
   }
 
-  //TODO: Change to automatically find gid
+  answerRound(args) {
+    let pid = args.pid
+    let round = args.round
+    let answers = args.answers
 
-  answerRound(pid, gid, round, answers) {
-    let game = this.games[gid]
-    for (player of game.players) {
-      if (player.id === pid) {
-        game.answers[round][pid] = answers
-        return true
+    for (gid in this.games) {
+      let game = this.games[gid]
+      for (player of game.players) {
+        if (player.id === pid) {
+          game.answers[round][pid] = answers
+          return true
+        }
       }
     }
 
@@ -98,7 +123,7 @@ class GameState {
 
     game.answers.slice(roundStart, roundEnd).forEach((round, num) => {
       for (pid in round) {
-        let scores = round[pid].map((answer, index) => answer.toLowerCase().replace(/[^\w]/g, '') === game.answerKey[num][pid][index].toLowerCase().replace(/[^\w]/g, ''))
+        let scores = round[pid].map((answer, index) => answer.toLowerCase().replace(/[^\w]/g, '') === game.answerKey[num][index].toLowerCase().replace(/[^\w]/g, ''))
 
         return scores
       }
@@ -164,7 +189,7 @@ function adminAccess(req, res) {
   }
   let gid
   try {
-    gid = '' + req.query.gid
+    gid = req.query.gid
   } catch (e) {}
   let game
   try {
@@ -196,7 +221,37 @@ function adminAccess(req, res) {
   })
 }
 
+function playerAccess(req, res) {
+  let pid
+  try {
+    pid = req.query.pid
+  } catch (e) {}
+  let round
+  try {
+    round = req.query.round
+  } catch (e) {}
+  let answers
+  try {
+    answers = req.query.answers
+  } catch (e) {}
+  let name
+  try {
+    name = req.query.name
+  } catch (e) {}
+  let roomNumber
+  try {
+    roomNumber = req.query.roomNumber
+  } catch (e) {}
+  let password
+  try {
+    password = req.query.password
+  } catch (e) {}
+
+  res.send(this.execute({ pid, round, answers, name, roomNumber, password }))
+}
+
 module.exports = {
   GameState,
-  adminAccess
+  adminAccess,
+  playerAccess
 }
