@@ -6,7 +6,7 @@ class GameState {
   constructor() {
     this.games = {}
     this.roomNumbers = []
-    this.words = JSON.parse(fs.readFileSync('server/words.json', 'utf8').toLowerCase())
+    this.words = JSON.parse(fs.readFileSync('server/words.json', 'utf8'))
   }
 
   // Start Game method:
@@ -79,14 +79,14 @@ class GameState {
     return false
   }
 
-  join(args) {
+  join(args) { // { name: "Alice Carroll", roomNumber: "982530", password: "six totally random words right here"}
     let name = args.name
     let roomNumber = args.roomNumber
     let password = args.password
 
     for (gid in this.games) {
       if (this.games[gid].roomNumber === roomNumber) {
-        if (this.games[gid].password === password.toLowerCase()) {
+        if (this.games[gid].password.toLowerCase().replace(/[^\w]/g, '') === password.toLowerCase().replace(/[^\w]/g, '')) {
           let pid = { id: crypto.createHash('sha256').update(name + Date.now()).digest('hex'), name: name }
           this.games[gid].players.push(pid)
           return pid
@@ -97,7 +97,7 @@ class GameState {
     return false
   }
 
-  answerRound(args) {
+  answerRound(args) { // { pid: "hexstuff829u4h888e92bjheuf", round: 4, answers: ["Some answer", "another"] }
     let pid = args.pid
     let round = args.round
     let answers = args.answers
@@ -115,13 +115,13 @@ class GameState {
     return false
   }
 
-  autoScore(args) {
+  autoScore(args) { // { gid: "morehex2o34u8f8j1u23u4uh", roundStart: 4, roundEnd: 7 }
     let gid = args.gid
     let roundStart = args.roundStart
     let roundEnd = args.roundEnd
     let game = this.games[gid]
 
-    game.answers.slice(roundStart, roundEnd).forEach((round, num) => {
+    game.answers.slice(roundStart, roundEnd + 1).forEach((round, num) => {
       for (pid in round) {
         let scores = round[pid].map((answer, index) => answer.toLowerCase().replace(/[^\w]/g, '') === game.answerKey[num][index].toLowerCase().replace(/[^\w]/g, ''))
 
