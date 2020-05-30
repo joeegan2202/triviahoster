@@ -1,49 +1,54 @@
-import React from 'react';
-import './App.css';
-
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom"
+import React from 'react'
+import './App.css'
+import Join from './Join'
 
 class App extends React.Component {
-  constructor(props) {
-    super(props)
+    constructor(props) {
+        super(props)
 
-    this.state = {}
-  }
+        this.state = {
+            page: 'join',
+            pid: null
+        }
+    }
 
-  componentDidMount() {
+    jsonCookie() { // Method to convert cookie data to parsed json automatically
+        let cookie = '{"' + document.cookie + '"}'
 
-  }
+        cookie = cookie.replace(/; /g, '", "')
+        cookie = cookie.replace(/=/g, '":"')
 
-  render() {
-    return (
-      <Router>
-        <div className="App">
-        </div>
-        <Switch>
-          <Route path="/" exact component={Home} />
-          <Route path="/join" exact component={Join} />
-        </Switch>
-      </Router>
-    );
-  }
-}
+        console.log(cookie)
 
-const Join = () => {
-  return (
-    <div id="join">
-      <h1>Please Join on this page!!!</h1>
-      <Link to="/">Click here to go home</Link>
-    </div>
-  )
-}
+        try {
+            return JSON.parse(cookie)
+        } catch (error) {
+            return false
+        }
+    }
 
-const Home = () => {
-  return (
-    <div id="home">
-      <h1>This is the Home Page!!!!</h1>
-      <Link to="/join">Click here to go to the join page</Link>
-    </div>
-  )
+    login() {
+        this.setState({ page: 'admin' })
+    }
+
+    join(name, roomNumber, password) {
+        fetch(`https://trivia.eganshub.net:3500/play/join?name=${name}&roomNumber=${roomNumber}&password=${password}`)
+            .then(pid => this.setState({ pid }))
+    }
+
+    componentDidMount() {
+
+    }
+
+    render() {
+        return (
+            <div id="App">
+                {(this.state.page === 'join' ? <Join login={login.bind(this)} join={this.join.bind(this)} /> : null)}
+                {(this.state.page === 'play' ? <Play /> : null)}
+                {(this.state.page === 'admin' ? <Admin /> : null)}
+            </div>
+        )
+    }
 }
 
 export default App;
