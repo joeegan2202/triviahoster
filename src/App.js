@@ -36,6 +36,7 @@ class App extends React.Component {
     join(name, roomNumber, password) {
         fetch(`https://trivia.eganshub.net:3500/play/join?name=${name}&roomNumber=${roomNumber}&password=${password}`)
             .then(pid => this.setState({ page: 'play', pid }))
+            .catch(err => console.log(err))
     }
 
     componentDidMount() {
@@ -45,6 +46,7 @@ class App extends React.Component {
     render() {
         return (
             <div id="App">
+                {this.state.pid}
                 {(this.state.page === 'join' ? <Join login={this.login.bind(this)} join={this.join.bind(this)} /> : null)}
                 {(this.state.page === 'play' ? <Play /> : null)}
                 {(this.state.page === 'admin' ? <Admin /> : null)}
