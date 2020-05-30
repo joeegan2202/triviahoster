@@ -38,7 +38,7 @@ class App extends React.Component {
     }
 
     login(uname, pword) {
-        fetch(`https://trivia.eganshub.net:3500/admin/auth?uname=${uname}&pword=${pword}`, { method: 'POST' })
+        fetch(`https://trivia.eganshub.net:3500/admin/auth?uname=${uname}&pword=${pword}`)
             .then(data => data.json())
             .then(session => (session ? this.setState({ session }) : null)) // TODO: Handle error here
             .catch(err => console.log(err))
