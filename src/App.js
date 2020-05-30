@@ -54,7 +54,7 @@ class App extends React.Component {
                 {this.state.pid}
                 {(this.state.page === 'join' ? <Join login={(() => this.setState({ page: 'admin' })).bind(this)} join={this.join.bind(this)} /> : null)}
                 {(this.state.page === 'play' ? <Play /> : null)}
-                {(this.state.page === 'admin' ? <Admin /> : null)}
+                {(this.state.page === 'admin' ? <Admin login={this.login.bind(this)} /> : null)}
             </div>
         )
     }
