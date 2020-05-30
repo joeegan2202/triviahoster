@@ -5,52 +5,52 @@ import Play from './Play'
 import Admin from './Admin'
 
 class App extends React.Component {
-  constructor(props) {
-    super(props)
+    constructor(props) {
+        super(props)
 
-    this.state = {
-      page: 'join',
-      pid: null
+        this.state = {
+            page: 'join',
+            pid: null
+        }
     }
-  }
 
-  jsonCookie() { // Method to convert cookie data to parsed json automatically
-    let cookie = '{"' + document.cookie + '"}'
+    jsonCookie() { // Method to convert cookie data to parsed json automatically
+        let cookie = '{"' + document.cookie + '"}'
 
-    cookie = cookie.replace(/; /g, '", "')
-    cookie = cookie.replace(/=/g, '":"')
+        cookie = cookie.replace(/; /g, '", "')
+        cookie = cookie.replace(/=/g, '":"')
 
-    console.log(cookie)
+        console.log(cookie)
 
-    try {
-      return JSON.parse(cookie)
-    } catch (error) {
-      return false
+        try {
+            return JSON.parse(cookie)
+        } catch (error) {
+            return false
+        }
     }
-  }
 
-  login() {
-    this.setState({ page: 'admin' })
-  }
+    login() {
+        this.setState({ page: 'admin' })
+    }
 
-  join(name, roomNumber, password) {
-    fetch(`https://trivia.eganshub.net:3500/play/join?name=${name}&roomNumber=${roomNumber}&password=${password}`)
-      .then(pid => this.setState({ pid }))
-  }
+    join(name, roomNumber, password) {
+        fetch(`https://trivia.eganshub.net:3500/play/join?name=${name}&roomNumber=${roomNumber}&password=${password}`)
+            .then(pid => this.setState({ page: 'play', pid }))
+    }
 
-  componentDidMount() {
+    componentDidMount() {
 
-  }
+    }
 
-  render() {
-    return (
-      <div id="App">
-        {(this.state.page === 'join' ? <Join login={this.login.bind(this)} join={this.join.bind(this)} /> : null)}
-        {(this.state.page === 'play' ? <Play /> : null)}
-        {(this.state.page === 'admin' ? <Admin /> : null)}
-      </div>
-    )
-  }
+    render() {
+        return (
+            <div id="App">
+                {(this.state.page === 'join' ? <Join login={this.login.bind(this)} join={this.join.bind(this)} /> : null)}
+                {(this.state.page === 'play' ? <Play /> : null)}
+                {(this.state.page === 'admin' ? <Admin /> : null)}
+            </div>
+        )
+    }
 }
 
 export default App;
