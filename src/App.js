@@ -34,7 +34,8 @@ class App extends React.Component {
     }
 
     join(name, roomNumber, password) {
-        fetch(`https://trivia.eganshub.net:3500/play/join?name=${name}&roomNumber=${roomNumber}&password=${password}`)
+        fetch(`https://trivia.eganshub.net:3500/play/join?name=${name}&roomNumber=${roomNumber}&password=${password}`, { method: 'POST' })
+            .then(data => data.json())
             .then(pid => this.setState({ page: 'play', pid }))
             .catch(err => console.log(err))
     }
