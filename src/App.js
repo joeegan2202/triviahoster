@@ -10,7 +10,8 @@ class App extends React.Component {
 
         this.state = {
             page: 'join',
-            pid: null
+            pid: null,
+            session: null
         }
     }
 
@@ -29,14 +30,17 @@ class App extends React.Component {
         }
     }
 
-    login() {
-        this.setState({ page: 'admin' })
-    }
-
     join(name, roomNumber, password) {
         fetch(`https://trivia.eganshub.net:3500/play/join?name=${name}&roomNumber=${roomNumber}&password=${password}`, { method: 'POST' })
             .then(data => data.json())
-            .then(pid => this.setState({ page: 'play', pid }))
+            .then(pid => (pid ? this.setState({ page: 'play', pid }) : null)) // TODO: Handle error here
+            .catch(err => console.log(err))
+    }
+
+    login(uname, password) {
+        fetch(`https://trivia.eganshub.net:3500/admin/login?uname=${uname}&password=${password}`, { method: 'POST' })
+            .then(data => data.json())
+            .then(session => (session ? this.setState({ session }) : null)) // TODO: Handle error here
             .catch(err => console.log(err))
     }
 
@@ -48,7 +52,7 @@ class App extends React.Component {
         return (
             <div id="App">
                 {this.state.pid}
-                {(this.state.page === 'join' ? <Join login={this.login.bind(this)} join={this.join.bind(this)} /> : null)}
+                {(this.state.page === 'join' ? <Join login={(() => this.setState({ page: 'admin' })).bind(this)} join={this.join.bind(this)} /> : null)}
                 {(this.state.page === 'play' ? <Play /> : null)}
                 {(this.state.page === 'admin' ? <Admin /> : null)}
             </div>
