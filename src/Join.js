@@ -1,4 +1,4 @@
-import React from 'React'
+import React from 'react'
 
 export class Join extends React.Component {
   constructor(props) {
