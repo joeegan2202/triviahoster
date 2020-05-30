@@ -1,6 +1,6 @@
 import React from 'react'
 
-export class Join extends React.Component {
+export default class Join extends React.Component {
   constructor(props) {
     super(props)
 
