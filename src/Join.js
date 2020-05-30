@@ -16,7 +16,7 @@ export default class Join extends React.Component {
           <h1>Play Trivia</h1>
           <a onClick={this.props.login}>Host Login</a>
         </div>
-        <form onSubmit={(() => this.props.join(document.getElementById('name'), document.getElementById('roomNumber'), document.getElementById('password')))}>
+        <form onSubmit={(() => this.props.join(document.getElementById('name').value, document.getElementById('roomNumber').value, document.getElementById('password').value))}>
           <input id="name" placeholder="Your Name:"></input>
           <input id="roomNumber" placeholder="Room Number:"></input>
           <input id="password" placeholder="Room Password:"></input>
